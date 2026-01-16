@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Client, GatewayIntentBits } from "discord.js";
+import schedule from "node-schedule";
 
 const client = new Client({
   intents: [
@@ -15,27 +16,34 @@ const client = new Client({
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  // Schedule a message at a specific time
-  setInterval(() => {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
+  const channelId = "1461798627503640780";
 
-    // Send message at specific time (e.g., 9:00 AM)
-    if (hours === 9 && minutes === 0) {
-      const channelId = "1461798627503640780";
-      const channel = client.channels.cache.get(channelId);
-
-      if (channel) {
-        channel.send(`<@423695908262379520> get to work`);
-      }
+  // Schedule message at 11:00 AM EST (Eastern Time)
+  schedule.scheduleJob("0 11 * * *", { tz: "America/New_York" }, () => {
+    const channel = client.channels.cache.get(channelId);
+    if (channel) {
+      channel.send({
+        content: `<@423695908262379520> get to work
+https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
+      });
     }
-  }, 60000); // Check every minute (60000 milliseconds)
+  });
+
+  // Schedule message at 5:00 PM EST (Eastern Time)
+  schedule.scheduleJob("0 17 * * *", { tz: "America/New_York" }, () => {
+    const channel = client.channels.cache.get(channelId);
+    if (channel) {
+      channel.send({
+        content: `<@423695908262379520> get to work
+https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
+      });
+    }
+  });
 });
 
 client.login(process.env.DISCORD_TOKEN);
 
-client.on("messageCreate", async (message) => {
+/* client.on("messageCreate", async (message) => {
   console.log(message);
 
   if (!message?.author.bot) {
@@ -44,7 +52,10 @@ client.on("messageCreate", async (message) => {
     const channel = client.channels.cache.get(channelId);
 
     if (channel) {
-      channel.send(`<@423695908262379520> get to work`);
+      channel.send({
+        content: `<@423695908262379520> get to work 
+https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
+      });
     }
-  }
-});
+  } 
+}); */
