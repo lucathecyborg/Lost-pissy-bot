@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Client, GatewayIntentBits } from "discord.js";
+import cron from "node-cron";
 
 const client = new Client({
   intents: [
@@ -20,76 +21,70 @@ client.on("clientReady", () => {
 
   const channelId = "1461798627503640780";
 
-  // Check every minute for scheduled times
-  setInterval(() => {
-    // Get current time in EST
-    const now = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
-    );
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const dateKey = now.toDateString(); // e.g., "Thu Jan 16 2026"
-
-    console.log(
-      `Current EST time: ${hours}:${minutes.toString().padStart(2, "0")}`,
-    );
-
-    // Send at 11:00 AM EST
-    if (hours === 11 && minutes === 0 && lastSentDate["11am"] !== dateKey) {
-      lastSentDate["11am"] = dateKey;
-      console.log("Attempting to send 11 AM message...");
-      const channel = client.channels.cache.get(channelId);
-
-      if (!channel) {
-        console.error(
-          "❌ Channel not found! Bot might not have access to this channel.",
-        );
-        return;
-      }
-
-      console.log(`✓ Channel found: ${channel.name}`);
-
-      channel
-        .send({
-          content: `<@423695908262379520> get to work
-https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
-        })
-        .then(() => console.log("✓ 11 AM message sent successfully!"))
-        .catch((err) =>
-          console.error("❌ Failed to send 11 AM message:", err.message),
-        );
+  // Schedule for 11:00 AM EST every day
+  cron.schedule('0 11 * * *', () => {
+    const dateKey = new Date().toDateString();
+    
+    if (lastSentDate["11am"] === dateKey) {
+      console.log("11 AM message already sent today, skipping...");
+      return;
     }
-
-    // Send at 5:00 PM EST
-    if (hours === 17 && minutes === 0 && lastSentDate["5pm"] !== dateKey) {
-      lastSentDate["5pm"] = dateKey;
-      console.log("Attempting to send 5 PM message...");
-      const channel = client.channels.cache.get(channelId);
-
-      if (!channel) {
-        console.error(
-          "❌ Channel not found! Bot might not have access to this channel.",
-        );
-        return;
-      }
-
-      console.log(`✓ Channel found: ${channel.name}`);
-
-      channel
-        .send({
-          content: `<@423695908262379520> get to work
-https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
-        })
-        .then(() => console.log("✓ 5 PM message sent successfully!"))
-        .catch((err) =>
-          console.error("❌ Failed to send 5 PM message:", err.message),
-        );
+    
+    lastSentDate["11am"] = dateKey;
+    console.log("Attempting to send 11 AM message...");
+    
+    const channel = client.channels.cache.get(channelId);
+    
+    if (!channel) {
+      console.error("❌ Channel not found! Bot might not have access to this channel.");
+      return;
     }
-  }, 60000); // Check every 60 seconds
+    
+    console.log(`✓ Channel found: ${channel.name}`);
+    
+    channel.send({
+      content: `<@423695908262379520> get to work
+https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
+    })
+    .then(() => console.log("✓ 11 AM message sent successfully!"))
+    .catch(err => console.error("❌ Failed to send 11 AM message:", err.message));
+  }, {
+    timezone: "America/New_York"
+  });
 
-  console.log(
-    "Bot is ready and checking for scheduled times every minute (EST timezone)",
-  );
+  // Schedule for 5:00 PM EST every day
+  cron.schedule('0 17 * * *', () => {
+    const dateKey = new Date().toDateString();
+    
+    if (lastSentDate["5pm"] === dateKey) {
+      console.log("5 PM message already sent today, skipping...");
+      return;
+    }
+    
+    lastSentDate["5pm"] = dateKey;
+    console.log("Attempting to send 5 PM message...");
+    
+    const channel = client.channels.cache.get(channelId);
+    
+    if (!channel) {
+      console.error("❌ Channel not found! Bot might not have access to this channel.");
+      return;
+    }
+    
+    console.log(`✓ Channel found: ${channel.name}`);
+    
+    channel.send({
+      content: `<@423695908262379520> get to work
+https://tenor.com/view/richard-attenborough-whip-whipped-whiplash-whiplashed-gif-16685949900343051341`,
+    })
+    .then(() => console.log("✓ 5 PM message sent successfully!"))
+    .catch(err => console.error("❌ Failed to send 5 PM message:", err.message));
+  }, {
+    timezone: "America/New_York"
+  });
+
+  console.log("Bot is ready with cron scheduled tasks (EST timezone)");
+  console.log("Scheduled: 11:00 AM EST and 5:00 PM EST daily");
 });
 
 // Error handling
